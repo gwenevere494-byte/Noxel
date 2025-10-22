@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NOXEL — Digital Literacy</title>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1: #eef2ff;
+      --purple: #6b46c1;
+      --indigo: #5b21b6;
+      --accent: #60a5fa;
+      --card: rgba(255,255,255,0.95);
+      --glass: rgba(255,255,255,0.12);
+      --text: #0f172a;
+      --soft: #7c3aed;
+      --muted: #6b7280;
+      --radius: 14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Poppins',sans-serif;
+      color:var(--text);
+      background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(59,130,246,0.05) 100%);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* NAV */
+    .nav{
+      position:fixed; left:0; right:0; top:14px; z-index:40;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 20px; gap:12px;
+      max-width:1100px; margin:0 auto; width:calc(100% - 40px);
+      background: linear-gradient(90deg, rgba(255,255,255,0.45), rgba(255,255,255,0.15));
+      border-radius:999px;
+      box-shadow: 0 6px 20px rgba(11,15,30,0.06);
+      backdrop-filter: blur(8px);
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--indigo);
+    }
+    .logo{
+      width:44px; height:44px; border-radius:10px;
+      background: linear-gradient(135deg,var(--soft),var(--accent));
+      display:flex; align-items:center; justify-content:center;
+      color:white; font-weight:700; box-shadow: 0 6px 18px rgba(99,102,241,0.18);
+    }
+    .brand h1{margin:0; font-size:1.05rem}
+    .nav-links{display:flex; gap:12px; align-items:center}
+    .nav-links a{color:var(--text); text-decoration:none; font-weight:500; padding:8px 12px; border-radius:10px}
+    .nav-links a:hover{background:rgba(91,33,182,0.08); color:var(--indigo)}
+
+    /* layout */
+    .container{max-width:1100px; margin:120px auto 80px; padding:20px; position:relative; z-index:10}
+    .hero{display:flex; gap:28px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .hero-left{flex:1; min-width:280px}
+    .hero-left h2{font-size:2rem; margin:6px 0 12px; color:var(--indigo)}
+    .hero-left p{color:var(--muted); line-height:1.6; max-width:630px}
+    .cta-row{margin-top:18px; display:flex; gap:12px; align-items:center}
+    .btn{
+      background:linear-gradient(90deg,var(--indigo),var(--soft));
+      color:white; border:none; padding:12px 18px; border-radius:12px; font-weight:600; cursor:pointer;
+      box-shadow: 0 8px 20px rgba(99,102,241,0.14);
+    }
+    .btn-secondary{
+      background:transparent; border:1px solid rgba(11,15,30,0.06); color:var(--indigo);
+    }
+
+    .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:30px}
+    .card{
+      background:var(--card); padding:18px; border-radius:14px; box-shadow: 0 8px 24px rgba(11,15,30,0.06);
+      transition:transform .28s ease, box-shadow .28s ease;
+    }
+    .card:hover{transform:translateY(-6px); box-shadow: 0 16px 40px rgba(11,15,30,0.08)}
+    .card h4{margin:0 0 8px; color:var(--indigo)}
+    .card p{margin:0; color:var(--muted); font-size:0.95rem}
+
+    #pixelCanvas{position:fixed; inset:0; z-index:0; pointer-events:none}
+
+    section.block{padding:48px 0}
+    .section-title{font-size:1.35rem; color:var(--indigo); margin-bottom:12px; text-align:center}
+
+    /* quiz area */
+    .quiz{max-width:760px; margin:0 auto; background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.88));
+      padding:22px; border-radius:12px; box-shadow: 0 10px 30px rgba(11,15,30,0.06);}
+    .question{font-weight:600; color:#111; margin-bottom:10px}
+    .choices{display:flex; flex-direction:column; gap:10px}
+    .choice{border-radius:10px; padding:10px 12px; background:rgba(245,247,250,0.9); border:1px solid rgba(11,15,30,0.04);
+      cursor:pointer; transition:all .18s ease;}
+    .choice:hover{transform:translateY(-4px); box-shadow:0 8px 20px rgba(91,33,182,0.06)}
+    .choice.selected{background:linear-gradient(90deg, rgba(107,70,193,0.07), rgba(96,165,250,0.06)); border-color: rgba(91,33,182,0.12)}
+    .quiz-footer{display:flex; justify-content:space-between; align-items:center; margin-top:14px}
+    .score{font-weight:700; color:var(--indigo)}
+
+    .small{font-size:0.9rem; color:var(--muted)}
+    .meta{display:flex; gap:12px; align-items:center; color:var(--muted); font-size:0.9rem}
+
+    textarea{width:100%; min-height:100px; padding:12px; border-radius:10px; border:1px solid rgba(11,15,30,0.06); font-family:inherit}
+
+    footer{padding:28px; text-align:center; color:var(--muted); font-size:0.9rem}
+    .level-btns{display:flex; gap:8px; justify-content:center; margin-bottom:12px}
+    .chip{padding:6px 10px;border-radius:999px;border:1px solid rgba(11,15,30,0.06);background:transparent;cursor:pointer}
+    .chip.active{background:linear-gradient(90deg,var(--indigo),var(--soft));color:white;border:none}
+    .result-good{color:green;font-weight:700}
+    .result-bad{color:#c05621;font-weight:700}
+
+    /* sentence chips for skimming */
+    .sentences{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+    .sentence{
+      padding:10px 12px; border-radius:10px; background:rgba(245,247,250,0.95); border:1px solid rgba(11,15,30,0.04);
+      cursor:pointer; transition:all .12s ease; user-select:none;
+    }
+    .sentence[data-state="neutral"]{background:rgba(245,247,250,0.95); color:var(--muted)}
+    .sentence[data-state="fact"]{background:linear-gradient(90deg, rgba(34,197,94,0.12), rgba(34,197,94,0.06)); border-color:rgba(34,197,94,0.18); color:#065f46}
+    .sentence[data-state="hoax"]{background:linear-gradient(90deg, rgba(245,158,11,0.12), rgba(245,158,11,0.06)); border-color:rgba(245,158,11,0.18); color:#92400e}
+    .sentence .hint{font-size:0.82rem; color:var(--muted); margin-top:6px}
+  </style>
+</head>
+<body>
+  <canvas id="pixelCanvas"></canvas>
+
+  <!-- NAV -->
+  <header class="nav">
+    <a class="brand" href="#home">
+      <div class="logo">NX</div>
+      <div>
+        <h1>NOXEL</h1>
+        <div style="font-size:11px;color:var(--muted)">Knowledge • Pixel</div>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#articles">Articles</a>
+      <a href="#training">Training</a>
+      <a href="#reflection">Reflection</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main class="container" id="home">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-left">
+        <h2>NOXEL — where every pixel builds the truth</h2>
+        <p>NOXEL membantu siswa mengenali dan menyaring informasi yang menipu. Pelajari cara mendeteksi hoaks, pahami bagaimana AI dapat membuat informasi palsu, dan latih kemampuan kritismu melalui latihan skimming & scanning serta kuis interaktif.</p>
+        <div class="cta-row">
+          <button class="btn" onclick="document.getElementById('training').scrollIntoView({behavior:'smooth'})">Latihan Skimming</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('articles').scrollIntoView({behavior:'smooth'})">Baca Artikel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="block">
+      <div class="section-title">About NOXEL</div>
+      <p style="max-width:860px; margin:8px auto 0; color:var(--muted)">NOXEL (Knowledge + Pixel) adalah platform edukasi yang mengajarkan remaja cara mengenali hoaks: dari menilai sumber, memeriksa bukti, sampai memahami peran AI dalam mencipta disinformasi.</p>
+    </section>
+
+    <!-- ARTICLES -->
+    <section id="articles" class="block">
+      <div class="section-title">Edukasi Hoaks</div>
+      <div class="cards">
+        <article class="card"><h4>Cara Mendeteksi Hoaks</h4><p>Cek sumber, penulis, tanggal, dan bukti pendukung sebelum membagikan informasi apa pun.</p></article>
+        <article class="card"><h4>AI dan Disinformasi</h4><p>AI dapat membuat gambar palsu dan teks bohong. Pelajari tanda-tanda konten buatan AI.</p></article>
+        <article class="card"><h4>Berpikir Kritis</h4><p>Gunakan logika dan data sebelum percaya atau membagikan informasi daring.</p></article>
+        <article class="card"><h4>Filter Informasi</h4><p>Pahami perbedaan antara opini, fakta, dan hoaks agar tidak tertipu narasi tertentu.</p></article>
+        <article class="card"><h4>Etika Digital</h4><p>Gunakan media sosial secara bertanggung jawab dengan menghargai privasi dan kebenaran.</p></article>
+        <article class="card"><h4>Literasi Visual</h4><p>Belajar mengenali manipulasi foto atau video menggunakan alat deteksi sederhana.</p></article>
+        <article class="card"><h4>Verifikasi Sumber</h4><p>Gunakan situs cek fakta seperti CekFakta.com atau TurnBackHoax.id untuk memastikan kebenaran.</p></article>
+        <article class="card"><h4>Jejak Digital</h4><p>Ingat, setiap klik meninggalkan jejak. Bijaklah dalam membagikan informasi online.</p></article>
+        <!-- New scientific article -->
+        <article class="card" id="scientificArticle">
+          <h4>Tips Ilmiah: Membedakan Fakta dan Hoaks</h4>
+          <p style="color:var(--muted)">
+            Dalam pendekatan ilmiah untuk literasi digital, pembaca dianjurkan mengikuti langkah sistematis: (1) Identifikasi sumber primer; (2) Verifikasi bukti melalui dua sumber independen; (3) Analisis klaim dengan prinsip falsifiability; (4) Gunakan tools forensik dasar (reverse image search, metadata check); (5) Evaluasi bias dan konflik kepentingan.
+          </p>
+          <ul style="color:var(--muted); margin-top:8px">
+            <li><strong>Gunakan verifikasi berlapis:</strong> temukan sumber asli dan bandingkan.</li>
+            <li><strong>Periksa data, bukan hanya narasi:</strong> klaim statistik harus punya referensi.</li>
+            <li><strong>Deteksi manipulasi visual:</strong> periksa bayangan, proporsi, atau tekstur gambar.</li>
+            <li><strong>Pertimbangkan motif:</strong> siapa yang diuntungkan dari penyebaran informasi?</li>
+          </ul>
+          <p class="small" style="margin-top:8px">Ringkasan panduan praktis berbasis praktik jurnalisme verifikasi dan prinsip ilmiah; cocok sebagai materi pembelajaran.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- TRAINING: Skimming & Scanning -->
+    <section id="training" class="block">
+      <div class="section-title">Training — Skimming & Scanning</div>
+      <div class="quiz" aria-live="polite">
+        <div style="text-align:center; margin-bottom:12px">
+          <div class="level-btns">
+            <button class="chip active" data-level="0" onclick="selectLevel(0)">Level 1 (60s)</button>
+            <button class="chip" data-level="1" onclick="selectLevel(1)">Level 2 (45s)</button>
+            <button class="chip" data-level="2" onclick="selectLevel(2)">Level 3 (30s)</button>
+          </div>
+          <div class="meta"><div id="levelInfo">Pilih level lalu tekan Start.</div></div>
+        </div>
+
+        <div id="trainingArea">
+          <div style="text-align:center; color:var(--muted)">Teks latihan akan muncul di sini saat kamu menekan <strong>Start</strong>.</div>
+        </div>
+
+        <div style="text-align:center; margin-top:14px">
+          <button class="btn" id="startTrainingBtn" onclick="startTraining()">Start</button>
+          <button class="btn btn-secondary" onclick="resetTraining()" style="margin-left:8px">Reset</button>
+        </div>
+
+        <div id="trainingResult" style="margin-top:12px; text-align:center"></div>
+      </div>
+    </section>
+
+    <!-- QUIZ Fakta/Hoaks (menggantikan quiz lama) -->
+    <section id="quiz" class="block">
+      <div class="section-title">Kuis Teks: Tentukan Fakta atau Hoaks</div>
+      <div class="quiz" id="textQuizArea">
+        <div id="textQuizQ"></div>
+        <div style="text-align:center; margin-top:12px">
+          <button class="btn" id="textQuizNext" onclick="submitTextQuiz()">Submit</button>
+          <button class="btn btn-secondary" style="margin-left:10px" onclick="restartTextQuiz()">Restart</button>
+        </div>
+        <div id="textQuizResult" style="margin-top:12px; text-align:center"></div>
+      </div>
+    </section>
+
+    <!-- REFLECTION -->
+    <section id="reflection" class="block">
+      <div class="section-title">Refleksi Diri — 5 Teks (Fakta & Hoaks)</div>
+      <div class="quiz">
+        <div id="reflectionArea"></div>
+        <div style="text-align:center; margin-top:12px">
+          <button class="btn" onclick="saveReflections()">Simpan Refleksi</button>
+          <button class="btn btn-secondary" style="margin-left:10px" onclick="clearReflections()">Hapus Simpanan</button>
+        </div>
+        <div id="reflectionMsg" style="margin-top:12px; text-align:center"></div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="block">
+      <div class="section-title">Contact</div>
+      <div class="cards">
+        <div class="card"><strong>Gwenevere Fernanda Putri</strong><p>📞 +62 822-8504-1143</p></div>
+        <div class="card"><strong>Elma Dearni Silaban</strong><p>📞 +62 822-9456-8388</p></div>
+        <div class="card"><strong>Nayla Zhafira Putri</strong><p>📞 +62 853-3339-8510</p></div>
+      </div>
+    </section>
+
+    <footer>© <span id="year"></span> NOXEL — Knowledge • Pixel • Empowering Critical Minds</footer>
+  </main>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* === PIXEL BACKGROUND === */
+    const canvas = document.getElementById('pixelCanvas'),
+          ctx = canvas.getContext('2d');
+    let W = canvas.width = window.innerWidth,
+        H = canvas.height = window.innerHeight;
+    const px = [];
+    const COUNT = Math.floor((W * H) / 14000);
+    const rand = (a,b) => Math.random() * (b - a) + a;
+
+    class P {
+      constructor() { this.r(); }
+      r() {
+        this.x = rand(0, W);
+        this.y = rand(0, H);
+        this.vx = rand(-0.2, 0.6);
+        this.vy = rand(-0.3, 0.3);
+        this.s = rand(1, 4);
+        this.a = rand(0.1, 0.8);
+        this.h = rand(210, 250);
+      }
+      u() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < -10 || this.x > W + 10 || this.y < -10 || this.y > H + 10) this.r();
+      }
+      d() {
+        ctx.fillStyle = `hsla(${this.h}, 80%, 65%, ${this.a})`;
+        ctx.fillRect(this.x, this.y, this.s, this.s);
+      }
+    }
+
+    for (let i = 0; i < COUNT; i++) px.push(new P());
+    const draw = () => { ctx.clearRect(0, 0, W, H); for (let p of px){ p.u(); p.d(); } requestAnimationFrame(draw); };
+    draw();
+    window.onresize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+
+    /* =========================
+       SKIMMING & SCANNING TRAINING
+       - user marks sentences as Fakta / Hoaks (or leaves neutral)
+       - 3 levels: 60s / 45s / 30s
+    ===========================*/
+
+    // texts with sentence-level annotations (isFact array)
+    const skimmingTexts = [
+      {
+        id: 1,
+        title: "Kebun Kota Panen Sayur",
+        // sentences array; each sentence has text and isFact boolean
+        sentences: [
+          {txt: "Dinas Pertanian melaporkan program kebun kota berhasil meningkatkan panen sayur lokal sebesar 20% pada kuartal terakhir.", isFact:true},
+          {txt: "Foto yang beredar menunjukkan panen luar biasa yang sebenarnya berasal dari negara lain.", isFact:false},
+          {txt: "Program melibatkan pelatihan teknik bertanam vertikal untuk warga.", isFact:true}
+        ]
+      },
+      {
+        id: 2,
+        title: "Pesan Berantai di Sekolah X",
+        sentences: [
+          {txt: "Sebuah pesan berantai mengklaim ada virus mematikan di Sekolah X yang menyebabkan puluhan siswa dirawat.", isFact:false},
+          {txt: "Tidak ada pernyataan resmi dari dinas kesehatan maupun pihak sekolah yang mengonfirmasi klaim itu.", isFact:true},
+          {txt: "Pesan itu mendorong orang tua untuk menutup sekolah selama seminggu tanpa dasar resmi.", isFact:false}
+        ]
+      },
+      {
+        id: 3,
+        title: "Proyek Panel Surya di Desa Y",
+        sentences: [
+          {txt: "Studi lapangan menyebutkan proyek panel surya menurunkan tagihan listrik rumah tangga hingga 40% pada area percobaan.", isFact:true},
+          {txt: "Semua rumah di desa dilaporkan beralih menjadi 100% energi terbarukan dalam semalam.", isFact:false},
+          {txt: "Proyek dimulai sebagai pilot oleh kelompok riset universitas dan pemerintah daerah.", isFact:true}
+        ]
+      },
+      {
+        id: 4,
+        title: "Posting Hadiah dari Bank Z",
+        sentences: [
+          {txt: "Sebuah postingan viral mengatakan Bank Z membagikan hadiah jutaan rupiah tanpa verifikasi.", isFact:false},
+          {txt: "Bank Z mengeluarkan pernyataan resmi yang menyatakan tidak ada program pembagian hadiah semacam itu.", isFact:true},
+          {txt: "Beberapa pengguna ditipu dengan formulir palsu meminta data pribadi.", isFact:true}
+        ]
+      },
+      {
+        id: 5,
+        title: "Inovasi Irigasi Hemat Air",
+        sentences: [
+          {txt: "Peneliti universitas mempublikasikan metode irigasi hemat air yang diuji pada 10 lahan percobaan.", isFact:true},
+          {txt: "Metode ini mampu membuat tanaman tumbuh tanpa air sama sekali.", isFact:false},
+          {txt: "Hasil awal menunjukkan efisiensi air yang meningkat pada kondisi terkontrol.", isFact:true}
+        ]
+      }
+    ];
+
+    const levelSettings = [
+      { label: "Level 1", seconds: 60, items: [0,2] }, // indexes in skimmingTexts
+      { label: "Level 2", seconds: 45, items: [1,3] },
+      { label: "Level 3", seconds: 30, items: [4] }
+    ];
+
+    let trainingState = {
+      level: 0,
+      itemIndex: 0,
+      timer: null,
+      timeLeft: 0,
+      active: null, // active text object
+      userMarks: [], // {textId, sentenceIndex, mark: 'fact'|'hoax'|null, timeLeft}
+      running: false
+    };
+
+    const levelBtns = document.querySelectorAll('.chip');
+    function selectLevel(i){
+      levelBtns.forEach(b=>b.classList.remove('active'));
+      levelBtns[i].classList.add('active');
+      trainingState.level = i;
+      document.getElementById('levelInfo').textContent = `${levelSettings[i].label} — Waktu tiap teks: ${levelSettings[i].seconds}s. Tekan Start untuk memulai latihan.`;
+      resetTraining(); // reset when switching
+    }
+
+    function startTraining(){
+      if (trainingState.running) return;
+      trainingState.running = true;
+      trainingState.itemIndex = 0;
+      trainingState.userMarks = [];
+      nextTrainingItem();
+    }
+
+    function nextTrainingItem(){
+      const lvl = trainingState.level;
+      const items = levelSettings[lvl].items;
+      if (trainingState.itemIndex >= items.length){
+        finishTraining();
+        return;
+      }
+      const textObj = skimmingTexts[ items[trainingState.itemIndex] ];
+      trainingState.active = JSON.parse(JSON.stringify(textObj)); // clone to attach no. indices
+      trainingState.timeLeft = levelSettings[lvl].seconds;
+      renderTrainingText();
+      trainingState.timer = setInterval(()=>{
+        trainingState.timeLeft--;
+        updateTimerUI();
+        if (trainingState.timeLeft <= 0){
+          clearInterval(trainingState.timer);
+          // auto-submit current marks (whatever user has clicked)
+          submitTrainingMarks();
+        }
+      },1000);
+    }
+
+    function updateTimerUI(){
+      const ta = document.getElementById('trainingArea');
+      const el = ta.querySelector('.timer');
+      if (el) el.textContent = `Waktu tersisa: ${trainingState.timeLeft}s`;
+    }
+
+    function renderTrainingText(){
+      const t = trainingState.active;
+      const ta = document.getElementById('trainingArea');
+      // render sentences as clickable items (state cycles neutral -> fact -> hoax -> neutral)
+      ta.innerHTML = `
+        <div style="margin-bottom:10px"><strong>${t.title}</strong></div>
+        <div style="background:rgba(245,247,250,0.9); padding:12px; border-radius:10px; color:var(--muted)">
+          <div class="small">Klik tiap kalimat untuk menandai: <strong>Fakta</strong> atau <strong>Hoaks</strong>. (Netral = belum ditandai)</div>
+          <div class="meta" style="margin-top:8px"><div class="timer">Waktu tersisa: ${trainingState.timeLeft}s</div></div>
+          <div class="sentences" id="sentencesList">
+            ${t.sentences.map((s,idx)=>`<div class="sentence" data-sidx="${idx}" data-state="neutral" onclick="cycleSentenceState(this)">
+              ${s.txt}
+              <div class="hint" style="display:none"></div>
+            </div>`).join('')}
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn" onclick="submitTrainingMarks()">Selesai (Jawab)</button>
+          <button class="btn btn-secondary" style="margin-left:8px" onclick="skipTraining()">Lewati</button>
+        </div>
+      `;
+    }
+
+    // cycle sentence state: neutral -> fact -> hoax -> neutral
+    function cycleSentenceState(el){
+      const st = el.getAttribute('data-state');
+      let next;
+      if (st === 'neutral') next = 'fact';
+      else if (st === 'fact') next = 'hoax';
+      else next = 'neutral';
+      el.setAttribute('data-state', next);
+      // small hint visibility
+      const hint = el.querySelector('.hint');
+      if (next === 'neutral'){ hint.style.display='none'; }
+      else { hint.style.display='block'; hint.textContent = next === 'fact' ? 'Ditandai: Fakta' : 'Ditandai: Hoaks'; }
+    }
+
+    function submitTrainingMarks(){
+      clearInterval(trainingState.timer);
+      const t = trainingState.active;
+      const sentenceEls = Array.from(document.querySelectorAll('#sentencesList .sentence'));
+      // record user's marks with remaining time as bonus
+      sentenceEls.forEach(el=>{
+        const sidx = Number(el.getAttribute('data-sidx'));
+        const state = el.getAttribute('data-state'); // 'neutral' | 'fact' | 'hoax'
+        trainingState.userMarks.push({
+          textId: t.id,
+          sentenceIndex: sidx,
+          mark: state === 'neutral' ? null : state,
+          timeLeft: trainingState.timeLeft
+        });
+      });
+      // evaluate and show feedback briefly
+      evaluateCurrentText();
+      // move to next after brief pause
+      trainingState.itemIndex++;
+      setTimeout(()=>{ document.getElementById('trainingResult').innerHTML=''; nextTrainingItem(); }, 900);
+    }
+
+    function evaluateCurrentText(){
+      const t = skimmingTexts.find(x=>x.id === trainingState.active.id);
+      // get the marks we just added (last N entries)
+      const n = trainingState.active.sentences.length;
+      const recent = trainingState.userMarks.slice(-n);
+      let correct = 0;
+      recent.forEach(m=>{
+        const annotation = t.sentences[m.sentenceIndex].isFact;
+        // user's mark null => incorrect
+        if (m.mark === null) return;
+        const userIsFact = (m.mark === 'fact');
+        if (userIsFact === annotation) correct++;
+      });
+      const bonus = recent.reduce((s,a)=> s + (a.mark ? a.timeLeft : 0), 0);
+      const resultEl = document.getElementById('trainingResult');
+      resultEl.innerHTML = `<div class="small">Jawaban benar pada teks ini: <strong>${correct}/${n}</strong>. Bonus waktu total dari jawaban benar: ${bonus}s</div>`;
+    }
+
+    function skipTraining(){
+      clearInterval(trainingState.timer);
+      const t = trainingState.active;
+      // record skips as null marks
+      t.sentences.forEach((s,idx)=>{
+        trainingState.userMarks.push({ textId: t.id, sentenceIndex: idx, mark: null, timeLeft: 0 });
+      });
+      trainingState.itemIndex++;
+      nextTrainingItem();
+    }
+
+    function finishTraining(){
+      trainingState.running = false;
+      clearInterval(trainingState.timer);
+      const resBox = document.getElementById('trainingResult');
+      // aggregate results per text
+      const grouped = {};
+      trainingState.userMarks.forEach(m=>{
+        if (!grouped[m.textId]) grouped[m.textId]=[];
+        grouped[m.textId].push(m);
+      });
+      let totalSentences = 0, totalCorrect = 0, totalBonus = 0;
+      const breakdown = Object.keys(grouped).map(tid=>{
+        const textObj = skimmingTexts.find(x=>x.id===Number(tid));
+        const marks = grouped[tid];
+        marks.forEach(m=>{
+          totalSentences++;
+          const ann = textObj.sentences[m.sentenceIndex].isFact;
+          const userMark = m.mark === 'fact' ? true : (m.mark === 'hoax' ? false : null);
+          if (userMark !== null && userMark === ann) totalCorrect++;
+          if (m.mark !== null && userMark === ann) totalBonus += m.timeLeft;
+        });
+        // small per-text summary
+        const correctCount = marks.reduce((s,m)=>{
+          const ann = textObj.sentences[m.sentenceIndex].isFact;
+          const userMark = m.mark === 'fact' ? true : (m.mark === 'hoax' ? false : null);
+          return s + ((userMark !== null && userMark === ann) ? 1 : 0);
+        },0);
+        return `<div style="margin-bottom:10px"><strong>${textObj.title}</strong> — benar ${correctCount}/${marks.length}</div>`;
+      }).join('');
+      const score = Math.round((totalCorrect/Math.max(totalSentences,1))*100 + Math.min(totalBonus, 30));
+      resBox.innerHTML = `
+        <div style="padding:12px">
+          <div class="score">${score}/100</div>
+          <div class="small">Total benar: ${totalCorrect}/${totalSentences}. Bonus waktu: ${totalBonus}s</div>
+          <div style="margin-top:8px">${score>=80 ? '<span class="result-good">Performa baik — terus latih kecepatan dan ketepatan.</span>' : '<span class="result-bad">Latihan lagi — fokus pada kata kunci dan bukti dalam teks.</span>'}</div>
+        </div>
+        <div style="text-align:left; margin-top:12px"><h4 style="color:var(--indigo)">Ringkasan per teks</h4>${breakdown}</div>
+      `;
+      // show final breakdown in area too
+      document.getElementById('trainingArea').innerHTML = `<div style="text-align:left">${breakdown}</div>`;
+    }
+
+    function resetTraining(){
+      clearInterval(trainingState.timer);
+      trainingState = { level: trainingState.level||0, itemIndex:0, timer:null, timeLeft:0, active:null, userMarks:[], running:false };
+      document.getElementById('trainingArea').innerHTML = `<div style="text-align:center; color:var(--muted)">Teks latihan akan muncul di sini saat kamu menekan <strong>Start</strong>.</div>`;
+      document.getElementById('trainingResult').innerHTML = '';
+    }
+
+    // initialize selected level
+    selectLevel(0);
+
+
+    /* =========================
+       REFLECTION (5 teks) saved into localStorage
+    ===========================*/
+
+    const reflectionTexts = [
+      {id:101, title:"Berita 1 — Program Kesehatan Sekolah", text:"Pusat kesehatan sekolah melaporkan program imunisasi mencegah wabah di dua kabupaten.", isFact:true},
+      {id:102, title:"Berita 2 — Klaim Obat Ajaib", text:"Sebuah posting klaim obat herbal 'Ajaib' menyembuhkan semua penyakit tanpa bukti penelitian.", isFact:false},
+      {id:103, title:"Berita 3 — Festival Seni Lokal", text:"Festival seni tahunan menarik ratusan pengunjung dan mendapat dukungan pemerintah daerah.", isFact:true},
+      {id:104, title:"Berita 4 — Hoaks Beasiswa Besar", text:"Sebuah pesan menyebar bahwa beasiswa X memberi uang tunai jutaan rupiah tanpa seleksi resmi.", isFact:false},
+      {id:105, title:"Berita 5 — Inovasi Sekolah Ramah Lingkungan", text:"Sebuah sekolah kecil menerapkan metode pengomposan yang mengurangi sampah 60% menurut laporan proyek.", isFact:true}
+    ];
+
+    function renderReflection(){
+      const area = document.getElementById('reflectionArea');
+      const saved = JSON.parse(localStorage.getItem('noxel_reflections')||'{}');
+      area.innerHTML = reflectionTexts.map(t=>`
+        <div style="margin-bottom:12px">
+          <div style="font-weight:700">${t.title} <span style="font-weight:600;color:var(--muted);font-size:0.9rem">[${t.isFact ? 'Fakta' : 'Hoaks'}]</span></div>
+          <div style="background:rgba(245,247,250,0.9); padding:10px; border-radius:8px; margin-top:6px; color:var(--muted)">${t.text}</div>
+          <div style="margin-top:8px">
+            <textarea id="ref_${t.id}" placeholder="Tulis refleksi singkat: apa yang kamu dapatkan dari teks ini?">${saved[t.id]||''}</textarea>
+          </div>
+        </div>
+      `).join('') + `<div class="small">Catatan: label [Fakta/Hoaks] ditampilkan untuk latihan refleksi. Jawaban disimpan di browser (localStorage).</div>`;
+    }
+
+    function saveReflections(){
+      const map = {};
+      reflectionTexts.forEach(t=>{
+        const v = document.getElementById('ref_'+t.id).value.trim();
+        if (v) map[t.id] = v;
+      });
+      localStorage.setItem('noxel_reflections', JSON.stringify(map));
+      document.getElementById('reflectionMsg').textContent = 'Refleksi disimpan di browser (localStorage).';
+      setTimeout(()=>document.getElementById('reflectionMsg').textContent='', 3000);
+    }
+
+    function clearReflections(){
+      localStorage.removeItem('noxel_reflections');
+      renderReflection();
+      document.getElementById('reflectionMsg').textContent = 'Refleksi dihapus.';
+      setTimeout(()=>document.getElementById('reflectionMsg').textContent='', 2500);
+    }
+
+    renderReflection();
+
+
+    /* =========================
+       TEXT QUIZ: Fakta vs Hoaks (replaces earlier multiple choice)
+    ===========================*/
+
+    const textQuizSet = [
+      {id:201, text:"Sebuah makalah ilmiah dari universitas meninjau efek pemakaian pupuk organik terhadap hasil panen dan menunjukkan kenaikan 15%—studi peer-reviewed.", isFact:true},
+      {id:202, text:"Sebuah posting viral menyatakan bahwa minum air lemon setiap pagi dapat menyembuhkan penyakit kronis tanpa bukti riset.", isFact:false},
+      {id:203, text:"Laporan resmi menyatakan pembangunan jembatan selesai lebih cepat dari jadwal berkat metode manajemen baru.", isFact:true},
+      {id:204, text:"Klaim di media sosial mengabarkan bahwa menghapus aplikasi X akan meningkatkan IQ penggunanya.", isFact:false},
+      {id:205, text:"Sebuah studi lapangan menyebutkan teknik pertanian konservasi mengurangi erosi tanah di daerah percobaan.", isFact:true}
+    ];
+
+    let tqIndex = 0, tqScore = 0, tqSelected = null;
+
+    function renderTextQuiz(){
+      const q = textQuizSet[tqIndex];
+      document.getElementById('textQuizQ').innerHTML = `
+        <div class='question'>${tqIndex+1}. Baca teks di bawah dan tentukan: Fakta atau Hoaks?</div>
+        <div style="background:rgba(245,247,250,0.9); padding:12px; border-radius:10px; color:var(--muted)">${q.text}</div>
+        <div class="choices" style="margin-top:10px">
+          <div class="choice" onclick="selectTQ(this,true)">Fakta</div>
+          <div class="choice" onclick="selectTQ(this,false)">Hoaks</div>
+        </div>
+      `;
+      document.getElementById('textQuizResult').textContent = '';
+      tqSelected = null;
+      document.getElementById('textQuizNext').textContent = (tqIndex === textQuizSet.length-1) ? 'Submit' : 'Next';
+    }
+
+    function selectTQ(el, val){
+      document.querySelectorAll('#textQuizQ .choice').forEach(c=>c.classList.remove('selected'));
+      el.classList.add('selected');
+      tqSelected = val;
+    }
+
+    function submitTextQuiz(){
+      if (tqSelected === null) return alert('Pilih Fakta atau Hoaks dulu!');
+      const q = textQuizSet[tqIndex];
+      const correct = (tqSelected === q.isFact);
+      if (correct) tqScore += 1;
+      document.getElementById('textQuizResult').innerHTML = correct ? `<div class="result-good">Benar</div>` : `<div class="result-bad">Salah — Jawaban: ${q.isFact ? 'Fakta' : 'Hoaks'}</div>`;
+      tqIndex++;
+      setTimeout(()=>{
+        if (tqIndex < textQuizSet.length) renderTextQuiz();
+        else finishTextQuiz();
+      },900);
+    }
+
+    function finishTextQuiz(){
+      document.getElementById('textQuizQ').innerHTML = `<div style="text-align:center;padding:12px">
+        <h3 style="color:var(--indigo)">Hasil Kuis Teks</h3>
+        <div class="score">${tqScore}/${textQuizSet.length}</div>
+        <div style="margin-top:8px">${tqScore >= Math.ceil(textQuizSet.length*0.8) ? '<span class="result-good">Bagus — kamu mampu mengenali sebagian besar teks.</span>' : '<span class="result-bad">Perlu lebih banyak latihan membaca kritis.</span>'}</div>
+      </div>`;
+      const summary = textQuizSet.map((q,i)=>`<div style="margin-top:6px"><strong>${i+1}.</strong> ${q.text.substring(0,90)}... — <em>jawaban benar: ${q.isFact ? 'Fakta' : 'Hoaks'}</em></div>`).join('');
+      document.getElementById('textQuizQ').innerHTML += `<div style="margin-top:12px;text-align:left">${summary}</div>`;
+      document.getElementById('textQuizResult').innerHTML = `<div class="small">Klik Restart untuk mencoba lagi.</div>`;
+    }
+
+    function restartTextQuiz(){
+      tqIndex = 0; tqScore = 0; tqSelected = null; renderTextQuiz();
+    }
+
+    renderTextQuiz();
+
+  </script>
+</body>
+</html>
